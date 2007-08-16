@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+  <title>jQuery AOP Test</title>
+  <script src="http://jqueryjs.googlecode.com/files/jquery-1.1.3.1.js"></script>
+  <script src="../src/aop.js"></script>
+  <style>
+	body 
+	{
+		font-family: arial;
+		font-size: 0.7em;
+	}
+  </style>
+ </head>
+
+ <body>
+
+  <span id="console"></span>
+
+  <script>
+
+	function test( title, pointcut, testFunction )
+	{
+
+		log("Weaving " + title);
+		log();
+
+		var weavedAspects = [];
+		
+		weavedAspects[0] = jQuery.aop.before( pointcut, function() { 
+			log("Before " + pointcut.method + " on '" + this + "'"); 
+		} );
+		
+		weavedAspects[1] = jQuery.aop.after ( pointcut, function(result) { 
+			log("After " + pointcut.method + " on '" + this + "' was " + result); 
+			return result; 
+		} );
+		
+		weavedAspects[2] = jQuery.aop.around( pointcut, function(invocation) { 
+			log("Around " + pointcut.method  + ".Begin: '" + this + "'"); 
+			var result = invocation.proceed(); 
+			log("Around " + pointcut.method  + ".End: " + result); 
+			return result; 
+		} );
+
+		log("Trying " + title);
+		testFunction();
+		log();
+
+		log("Unweaving " + title);
+
+		weavedAspects[2].unweave();
+		weavedAspects[1].unweave();
+		weavedAspects[0].unweave();
+
+		log("Retrying unweaved functions");
+		testFunction();
+
+		log("Finished");
+
+		log("<hr>");
+
+	}
+
+
+	// Test built-in objects
+	(function() {
+		test('built-in objects', {target: String, method: 'indexOf' }, function() { 
+			log( "test".indexOf('e') ); 
+		} ); 
+	})();
+
+
+	// Test built-in objects
+	(function() {
+		test('built-in objects', {target: String, method: 'indexOf' }, function() { 
+			var str = "test";
+			log( str.indexOf('e') ); 
+		} ); 
+	})();
+
+
+	// Test custom objects with prototype and prototyped function
+	(function() {
+
+		function Prototyped( str )
+		{
+			this.ID = str;
+		}
+
+		Prototyped.prototype.getID = function() {
+			return this.ID;
+		}
+
+		test('custom objects with prototype and prototyped function', {target: Prototyped, method: 'getID' }, function() { 
+			var custom = new Prototyped("testID");
+			log( custom.getID() );
+		} ); 
+	})();
+
+
+	// Test custom objects with prototype but instance-function
+	(function() {
+
+		function PrototypedWithInstanceFunctions( str )
+		{
+			this.ID = str;
+		}
+
+		PrototypedWithInstanceFunctions.prototype.getID = function() {
+			return this.ID;
+		}
+
+		var instance = new PrototypedWithInstanceFunctions("testID");
+
+		instance.getIDInstance = function() {
+			return this.ID;
+		}
+
+		test('custom objects with prototype but instance-function', {target: instance, method: 'getIDInstance' }, function() { 
+			log( instance.getIDInstance() );
+		} ); 
+
+	})();
+
+
+
+	// Test global functions invoked with "call" on a custom objects with prototype
+	(function() {
+
+		window.TestFunction1 = function(index) 
+		{
+			return this.ID + ".." + index;
+		}
+
+		function Prototyped( str )
+		{
+			this.ID = str;
+		}
+
+		Prototyped.prototype.getID = function() {
+			return this.ID;
+		}
+
+		test('global functions invoked with "call" on a custom objects with prototype', {target: window, method: 'TestFunction1' }, function() { 
+			var custom = new Prototyped("testID");
+			log( TestFunction1.call(custom, 10) );
+		} ); 
+
+		window.TestFunction1 = null;
+
+	})();
+
+
+	// Test global functions invoked with "call" on a custom objects without prototype
+	(function() {
+
+		window.TestFunction2 = function(index) 
+		{
+			return this.ID + ".." + index;
+		}
+
+		function Custom( str )
+		{
+			this.ID = str;
+		}
+
+		test('global functions invoked with "call" on a custom objects without prototype', {target: window, method: 'TestFunction2' }, function() { 
+			var custom = new Custom("testID");
+			log( TestFunction2.call(custom, 10) );
+		} );
+
+		window.TestFunction2 = null;
+
+	})();
+
+
+	// Test custom objects without prototype
+	(function() {
+
+		function Custom( str )
+		{
+			this.ID = str;
+		}
+
+		var custom = new Custom("testID");
+		custom.GetData = function(index) {
+			return this.ID + ":" + index
+		}
+
+		test('custom objects without prototype', {target: custom, method: 'GetData' }, function() { 
+			log( custom.GetData(10) );
+		} ); 
+
+	})();
+
+
+	// Test global functions
+	(function() {
+
+		window.Now = function(index) 
+		{
+			return ( new Date() ) + " TEST " + index;
+		}
+
+		test('global functions', {target: window, method: 'Now' }, function() { 
+			log( Now(105) );
+		} ); 
+
+		window.Now = null;
+
+	})();
+
+
+	// Test global functions with "eval()"
+	(function() {
+
+		window.Now = function(index) 
+		{
+			return ( new Date() ) + " TEST " + index;
+		}
+
+		test('global functions with "eval()"', {target: window, method: 'Now' }, function() { 
+			log( eval("Now(105)") );
+		} ); 
+
+		window.Now = null; 
+
+	})();
+
+	// log message
+	function log(str) {
+		document.getElementById("console").innerHTML += (typeof(str) == 'undefined' ? '' : str) + "<br/>";
+	}
+
+  </script>
+ </body>
+</html>
