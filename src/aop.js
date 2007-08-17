@@ -50,7 +50,7 @@
 
 		return aspect;
 
-	}
+	};
 
 	jQuery.aop = 
 	{
@@ -137,6 +137,6 @@
 		{
 			return weave( pointcut, { type:'around', value: advice } );
 		}
-	}
+	};
 
 })();
