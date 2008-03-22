@@ -1,0 +1,12 @@
+body 
+{
+	font-family: arial;
+	font-size: 0.7em;
+}
+
+pre
+{
+	font-size: 1.2em;
+	border: 1px solid #ddd;
+	margin-bottom: 0;
+}
