@@ -19,7 +19,10 @@ function testcase(title, testFunction) {
 
 	window.TestResults[window.TestResults.length] = {Succeeded: succeeded, Title: title};
 	
-	log("<font color='green'><b>Test passed</b></font><hr/>");
+	if (succeeded)
+		log("<font color='green'><b>Test passed</b></font>");
+
+	log("<hr/>");
 
 }
 
@@ -154,4 +157,9 @@ function log(str) {
 function assert(condition, message) {
 	if (!condition)
 		throw message;
+}
+
+function assertAreEqual(expected, actual, message) {
+	if (expected != actual)
+		throw message + "; Expected: " + expected + ", Actual: " + actual;
 }

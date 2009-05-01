@@ -40,7 +40,7 @@
 			};
 		else if (advice.type == _around) {
 			aspect = function() {
-				var invocation = { object: this, args: arguments };
+				var invocation = { object: this, args: Array.prototype.slice.call(arguments) };
 				return advice.value.apply(invocation.object, [{ arguments: invocation.args, method: method, proceed : 
 					function() {
 						return old.apply(invocation.object, invocation.args);
