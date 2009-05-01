@@ -82,9 +82,6 @@
 				}
 			}
 
-			if (advices.length == 0)
-				throw 'No method: ' + pointcut.method;
-
 		} 
 		else
 		{
