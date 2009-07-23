@@ -5,7 +5,7 @@
 * Licensed under the MIT license:
 * http://www.opensource.org/licenses/mit-license.php
 *
-* Version: 1.1
+* Version: 1.2
 */
 
 (function() {
@@ -22,6 +22,22 @@
 	var weaveOne = function(source, method, advice) {
 
 		var old = source[method];
+
+		// Work-around IE6/7 behavior on some native method that return object instances
+		if (!(old instanceof Function)) {
+
+			var oldObject = old;
+			old = function() {
+				var code = arguments.length > 0 ? 'arguments[0]' : '';
+
+				for (var i=1;i<arguments.length;i++) {
+					code += ',arguments[' + i + ']';
+				}
+
+				return eval('oldObject(' + code + ');');
+			};
+
+		}
 
 		var aspect;
 		if (advice.type == _after)
@@ -76,10 +92,17 @@
 
 			for (var method in source)
 			{
-				if (source[method] != null && source[method] instanceof Function && method.match(pointcut.method))
-				{
-					advices[advices.length] = weaveOne(source, method, advice);
+				var item = null;
+
+				// Ignore exceptions during method retrival
+				try {
+					item = source[method];
 				}
+				catch (e) { }
+
+				if (item != null && item instanceof Function && method.match(pointcut.method))
+					advices[advices.length] = weaveOne(source, method, advice);
+
 			}
 
 		} 

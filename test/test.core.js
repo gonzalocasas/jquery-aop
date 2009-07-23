@@ -140,6 +140,7 @@ function results()
 	}
 
 	log("<b>Successful tests: " + summary.Succeeded + ", failed tests: " + summary.Failed + "</b>");
+	document.title = "Successful tests: " + summary.Succeeded + ", failed tests: " + summary.Failed;
 
 }
 

@@ -19,8 +19,11 @@
 		var thing = new Thing();
 		var result = thing.doSomething("arg1", "arg2", "arg3");
 
-		for (var i in aspects)
-			aspects[i].unweave();
+		if (aspects.length > 0)
+			for (var i in aspects)
+				aspects[i].unweave();
+		else
+			aspects.unweave();
 
 		assertAreEqual("arg1,arg2", result, "Around-advices allows argument manipulation (remove)");
 
