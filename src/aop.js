@@ -6,6 +6,10 @@
 * http://www.opensource.org/licenses/mit-license.php
 *
 * Version: 1.2
+*
+* Cross-frame type detection based on Daniel Steigerwald's code (http://daniel.steigerwald.cz)
+* http://gist.github.com/204554
+*
 */
 
 (function() {
@@ -15,6 +19,35 @@
 	var _around	= 3;
 	var _intro  = 4;
 	var _regexEnabled = true;
+	var _arguments = 'arguments';
+	var _undef = 'undefined';
+
+	var typeCheck = (function() {
+	 
+		var toString = Object.prototype.toString,
+			toStrings = {},
+			nodeTypes = { 1: 'element', 3: 'textnode', 9: 'document', 11: 'fragment' },
+			types = 'Arguments Array Boolean Date Document Element Error Fragment Function NodeList Null Number Object RegExp String TextNode Undefined Window'.split(' ');
+	 
+		for (var i = types.length; i--; ) {
+			var type = types[i], constructor = window[type];
+			if (constructor) {
+				try { toStrings[toString.call(new constructor)] = type.toLowerCase(); }
+				catch (e) { }
+			}
+		}
+	 
+		return function(item) {
+			return item == null && (item === undefined ? _undef : 'null') ||
+				item.nodeType && nodeTypes[item.nodeType] ||
+				typeof item.length == 'number' && (
+					item.callee && _arguments ||
+					item.alert && 'window' ||
+					item.item && 'nodelist') ||
+				toStrings[toString.call(item)];
+		};
+	 
+	})();
 
 	/**
 	 * Private weaving function.
@@ -24,19 +57,17 @@
 		var old = source[method];
 
 		// Work-around IE6/7 behavior on some native method that return object instances
-		if (!(old instanceof Function)) {
-
+		if (advice.type != _intro && typeCheck(old) != 'function') {
 			var oldObject = old;
 			old = function() {
-				var code = arguments.length > 0 ? 'arguments[0]' : '';
+				var code = arguments.length > 0 ? _arguments + '[0]' : '';
 
 				for (var i=1;i<arguments.length;i++) {
-					code += ',arguments[' + i + ']';
+					code += ',' + _arguments + '[' + i + ']';
 				}
 
 				return eval('oldObject(' + code + ');');
 			};
-
 		}
 
 		var aspect;
@@ -83,11 +114,11 @@
 	var weave = function(pointcut, advice)
 	{
 
-		var source = (typeof(pointcut.target.prototype) != 'undefined') ? pointcut.target.prototype : pointcut.target;
+		var source = (typeof(pointcut.target.prototype) != _undef) ? pointcut.target.prototype : pointcut.target;
 		var advices = [];
 
 		// If it's not an introduction and no method was found, try with regex...
-		if (advice.type != _intro && typeof(source[pointcut.method]) == 'undefined')
+		if (advice.type != _intro && typeof(source[pointcut.method]) == _undef)
 		{
 
 			for (var method in source)

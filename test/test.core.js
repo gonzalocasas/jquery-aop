@@ -1,34 +1,19 @@
-window.TestResults = [];
-
-function testcase(title, testFunction) {
-
-	log("<b>" + title + "</b>");
-	log();
-
-	var succeeded = true;
-
-	try
-	{
-		testFunction();
-	}
-	catch (e)
-	{
-		succeeded = false;
-		log("<font color='red'><b>" + e + "</b></font>");
-	}
-
-	window.TestResults[window.TestResults.length] = {Succeeded: succeeded, Title: title};
-	
-	if (succeeded)
-		log("<font color='green'><b>Test passed</b></font>");
-
-	log("<hr/>");
-
-}
-
-function test(includedTests, title, pointcut, testFunction)
+function testAop(title, includedTests, pointcut, testFunction, setupFunction)
 {
-	testcase("Weaving " + title, function() {
+	// Default to after/before/around if nothing is defined
+	if (!jQuery.isArray(includedTests)) {
+		setupFunction = testFunction;
+		testFunction = pointcut;
+		pointcut = includedTests;
+		includedTests = ['after', 'before', 'around'];
+	}
+
+	test("Testing " + title, function() {
+
+		if (setupFunction)
+		{
+			setupFunction();
+		}
 
 		var weavedAspects = [];
 		var invokeCounter = 0;
@@ -38,7 +23,7 @@ function test(includedTests, title, pointcut, testFunction)
 		{
 			weavedAspects[weavedAspects.length] = jQuery.aop.before( pointcut, function() { 
 				invokeCounter++;
-				log("<font color='green'>Executing <i>Before</i> " + arguments[arguments.length-1] + " (" + pointcut.method + ") on</font> '" + this + "'"); 
+				ok(true, "Executing <i>Before</i> " + arguments[arguments.length-1] + " (" + pointcut.method + ") on '" + this + "'");
 			} );
 		}
 		
@@ -46,7 +31,7 @@ function test(includedTests, title, pointcut, testFunction)
 		{
 			weavedAspects[weavedAspects.length] = jQuery.aop.after ( pointcut, function(result, method) { 
 				invokeCounter++;
-				log("<font color='green'>Executing <i>After</i> " + method + " (" + pointcut.method + ") on</font> '" + this + "' <font color='green'>was</font> '" + result + "'</font>"); 
+				ok(true, "Executing <i>After</i> " + method + " (" + pointcut.method + ") on '" + this + "' was '" + result); 
 				return result; 
 			} );
 		}
@@ -54,10 +39,9 @@ function test(includedTests, title, pointcut, testFunction)
 		if (jQuery.inArray('around', includedTests) > -1)
 		{
 			weavedAspects[weavedAspects.length] = jQuery.aop.around( pointcut, function(invocation) { 
-				log("<font color='green'>Executing <i>Around</i> " + invocation.method + " (" + pointcut.method + ") begin:</font> '" + this + "'"); 
 				invokeCounter++;
 				var result = invocation.proceed(); 
-				log("<font color='green'>Executing <i>Around</i> " + invocation.method  + " (" + pointcut.method + ") end:</font> '" + result + "'"); 
+				ok(true, "Executing <i>Around</i> " + invocation.method  + " (" + pointcut.method + ") on '" + this + "' was '" + result + "'"); 
 				return result; 
 			} );
 		}
@@ -65,7 +49,7 @@ function test(includedTests, title, pointcut, testFunction)
 		if (jQuery.inArray('introduction', includedTests) > -1)
 		{
 			weavedAspects[weavedAspects.length] = jQuery.aop.introduction( pointcut, function(invocation) { 
-				log("<font color='green'>Executing <i>Introduction</i> " + pointcut.method  + " on:</font> '" + this + "'"); 
+				ok(true, "Executing <i>Introduction</i> " + pointcut.method  + " on: '" + this + "'"); 
 				invokeCounter++;
 				return 'introduction method executed';
 			} );
@@ -77,13 +61,7 @@ function test(includedTests, title, pointcut, testFunction)
 			aspectCounter += (weavedAspects[i].length > 0) ? weavedAspects[i].length : 1;
 		}
 
-		log("Trying " + title + "...");
-
 		var returnValue = testFunction();
-
-		log("Result: <pre>" + returnValue + "</pre>");
-
-		log("Unweaving " + title + "...");
 
 		for (var i = (weavedAspects.length-1); i >= 0; i--) 
 		{
@@ -98,69 +76,11 @@ function test(includedTests, title, pointcut, testFunction)
 			}
 		}
 
-		log("Retrying unweaved functions...");
-
 		var unweavedReturn = testFunction();
 
-		log("Result: <pre>" + unweavedReturn + "</pre>");
-
-		var succeeded = (unweavedReturn == returnValue && invokeCounter == aspectCounter);
-
-		if (!succeeded)
-		{
-			throw "Results do not match (" + aspectCounter + " aspects weaved but " + invokeCounter + " aspects executed)";
-		}
-
-		log("<font color='green'><b>Results match (" + aspectCounter + " aspects weaved)</b></font>");
+		same(unweavedReturn, returnValue, "Results should be the same before and after unweaving");
+		same(invokeCounter, aspectCounter, "Aspects executed should match aspects weaved");
 
 	});
 
-}
-
-function results()
-{
-	var summary = { Succeeded: 0, Failed: 0, Text: '' };
-
-	for (var i in window.TestResults)
-	{
-		if (window.TestResults[i].Succeeded == true)
-		{
-			summary.Succeeded++;
-		}
-		else
-		{
-			summary.Failed++;
-			summary.Text += "  Title: " + window.TestResults[i].Title + "\n";
-		}
-	}
-
-	if (summary.Failed > 0)
-	{
-		alert("Passed: " + summary.Succeeded + "\nFailed: " + summary.Failed + "\nFailed tests:\n" + summary.Text);
-	}
-
-	log("<b>Successful tests: " + summary.Succeeded + ", failed tests: " + summary.Failed + "</b>");
-	document.title = "Successful tests: " + summary.Succeeded + ", failed tests: " + summary.Failed;
-
-}
-
-// log message
-function log(str) {
-	if (document.getElementById("console") == null)
-	{
-		var console = document.createElement("SPAN");
-		console.id = "console";
-		document.body.appendChild(console);
-	}
-	document.getElementById("console").innerHTML += (typeof(str) == 'undefined' ? '' : str) + "<br/>";
-}
-
-function assert(condition, message) {
-	if (!condition)
-		throw message;
-}
-
-function assertAreEqual(expected, actual, message) {
-	if (expected != actual)
-		throw message + "; Expected: " + expected + ", Actual: " + actual;
 }
