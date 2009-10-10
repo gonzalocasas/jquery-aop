@@ -4,7 +4,7 @@ $(document).ready(function(){
 
 	(function() {
 		testAop('built-in objects', {target: String, method: 'indexOf' }, function() { 
-			expect(5);
+			expect(6);
 			return "test".indexOf('e'); 
 		} ); 
 	})();
@@ -21,7 +21,7 @@ $(document).ready(function(){
 		}
 
 		testAop('custom objects with prototype and prototyped function', {target: Prototyped, method: 'getID' }, function() { 
-			expect(5);
+			expect(6);
 			var custom = new Prototyped("testID");
 			return custom.getID();
 		} ); 
@@ -46,7 +46,7 @@ $(document).ready(function(){
 		}
 
 		testAop('custom objects with prototype but instance-function', {target: instance, method: 'getIDInstance' }, function() { 
-			expect(5);
+			expect(6);
 			return instance.getIDInstance();
 		} ); 
 
@@ -66,7 +66,7 @@ $(document).ready(function(){
 		}
 
 		testAop('custom objects without prototype', {target: custom, method: 'GetData' }, function() { 
-			expect(5);
+			expect(6);
 			return custom.GetData(10);
 		} ); 
 
@@ -83,7 +83,7 @@ $(document).ready(function(){
 		var dog = new Dog();
 
 		testAop('issue #3', ['after'], {target: dog, method: 'bark' }, function() { 
-			expect(3);
+			expect(4);
 			return dog.bark();
 		} ); 
 
@@ -205,5 +205,14 @@ $(document).ready(function(){
 
 
 	});
+
+
+	(function() {
+		var obj = $('#qunit-header');
+		testAop('advice on jQuery.get', {target: obj, method: 'get' }, function() { 
+			expect(6);
+			return obj.get(0).innerText; 
+		} ); 
+	})();
 
 });

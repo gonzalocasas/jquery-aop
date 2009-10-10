@@ -18,6 +18,9 @@ function testAop(title, includedTests, pointcut, testFunction, setupFunction)
 		var weavedAspects = [];
 		var invokeCounter = 0;
 		var aspectCounter = 0;
+		var isIntroductionsTest = jQuery.inArray('introduction', includedTests) > -1;
+
+		var originalReturnValue = isIntroductionsTest ? null : testFunction();
 
 		if (jQuery.inArray('before', includedTests) > -1)
 		{
@@ -46,7 +49,7 @@ function testAop(title, includedTests, pointcut, testFunction, setupFunction)
 			} );
 		}
 
-		if (jQuery.inArray('introduction', includedTests) > -1)
+		if (isIntroductionsTest)
 		{
 			weavedAspects[weavedAspects.length] = jQuery.aop.introduction( pointcut, function(invocation) { 
 				ok(true, "Executing <i>Introduction</i> " + pointcut.method  + " on: '" + this + "'"); 
@@ -77,6 +80,11 @@ function testAop(title, includedTests, pointcut, testFunction, setupFunction)
 		}
 
 		var unweavedReturn = testFunction();
+
+		if (!isIntroductionsTest)
+		{
+			same(originalReturnValue, returnValue, "Results should be the same before and after weaving");
+		}
 
 		same(unweavedReturn, returnValue, "Results should be the same before and after unweaving");
 		same(invokeCounter, aspectCounter, "Aspects executed should match aspects weaved");

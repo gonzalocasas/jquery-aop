@@ -14,7 +14,7 @@ $(document).ready(function(){
 		}
 
 		testAop('global functions invoked with "call" on a custom objects with prototype', {target: window, method: 'TestFunction1' }, function() { 
-			expect(5);
+			expect(6);
 
 			var custom = new Prototyped("testID");
 			return TestFunction1.call(custom, 10);
@@ -37,7 +37,7 @@ $(document).ready(function(){
 		}
 
 		testAop('global functions invoked with "call" on a custom objects without prototype', {target: window, method: 'TestFunction2' }, function() { 
-			expect(5);
+			expect(6);
 			var custom = new Custom("testID");
 			return TestFunction2.call(custom, 10);
 		}, function() {
@@ -53,7 +53,7 @@ $(document).ready(function(){
 	(function() {
 
 		testAop('global functions', {target: window, method: 'MinDate' }, function() { 
-			expect(5);
+			expect(6);
 			return MinDate(105);
 		}, function() {
 			window.MinDate = function(index) 
@@ -68,7 +68,7 @@ $(document).ready(function(){
 	(function() {
 
 		testAop('global functions with "eval()"', {target: window, method: 'MinDate' }, function() { 
-			expect(5);
+			expect(6);
 			return eval("MinDate(105)");
 		}, function() {
 			window.MinDate = function(index) 

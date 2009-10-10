@@ -18,7 +18,7 @@ $(document).ready(function(){
 		}
 
 		testAop('custom objects with prototype and prototyped function using regex', {target: Prototyped, method: 'getI' }, function() { 
-			expect(8);
+			expect(9);
 			var custom = new Prototyped("testID");
 			return custom.getID() + " - " + custom.getIDSecond();
 		} ); 
@@ -27,7 +27,7 @@ $(document).ready(function(){
 	(function() {
 
 		testAop('global functions with regex match', {target: window, method: /Get(\d+)/ }, function() { 
-			expect(14);
+			expect(15);
 			return Get1() + Get2() + Get3() + Get4() + Get() + GetString();
 		}, function() {
 
