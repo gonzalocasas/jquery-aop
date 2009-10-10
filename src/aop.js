@@ -154,10 +154,16 @@
 		 * has completed execution successfully, and will receive one parameter with the result of the execution.
 		 * This function returns an array of weaved aspects (Function).
 		 *
-		 * @example jQuery.aop.after( {target: window, method: 'MyGlobalMethod'}, function(result) { alert('Returned: ' + result); } );
+		 * @example jQuery.aop.after( {target: window, method: 'MyGlobalMethod'}, function(result) { 
+		 *                alert('Returned: ' + result); 
+		 *                return result;
+		 *          } );
 		 * @result Array<Function>
 		 *
-		 * @example jQuery.aop.after( {target: String, method: 'indexOf'}, function(index) { alert('Result found at: ' + index + ' on:' + this); } );
+		 * @example jQuery.aop.after( {target: String, method: 'indexOf'}, function(index) { 
+		 *                alert('Result found at: ' + index + ' on:' + this); 
+		 *                return index;
+		 *          } );
 		 * @result Array<Function>
 		 *
 		 * @name after
@@ -165,7 +171,7 @@
 		 * @option Object target Target object to be weaved. 
 		 * @option String method Name of the function to be weaved. Regex are supported, but not on built-in objects.
 		 * @param Function advice Function containing the code that will get called after the execution of the point-cut. It receives one parameter
-		 *                        with the result of the point-cut's execution.
+		 *                        with the result of the point-cut's execution. The function can choose to return this same value or a different one.
 		 *
 		 * @type Array<Function>
 		 * @cat Plugins/General
@@ -180,10 +186,14 @@
 		 * but cannot modify the behavior of the method, or prevent its execution.
 		 * This function returns an array of weaved aspects (Function).
 		 *
-		 * @example jQuery.aop.before( {target: window, method: 'MyGlobalMethod'}, function() { alert('About to execute MyGlobalMethod'); } );
+		 * @example jQuery.aop.before( {target: window, method: 'MyGlobalMethod'}, function() { 
+		 *                alert('About to execute MyGlobalMethod'); 
+		 *          } );
 		 * @result Array<Function>
 		 *
-		 * @example jQuery.aop.before( {target: String, method: 'indexOf'}, function(index) { alert('About to execute String.indexOf on: ' + this); } );
+		 * @example jQuery.aop.before( {target: String, method: 'indexOf'}, function(index) {
+		 *                alert('About to execute String.indexOf on: ' + this);
+		 *          } );
 		 * @result Array<Function>
 		 *
 		 * @name before
@@ -246,10 +256,14 @@
 		 * name. To restore them, just unweave it.
 		 * This function returns an array with only one weaved aspect (Function).
 		 *
-		 * @example jQuery.aop.introduction( {target: window, method: 'MyGlobalMethod'}, function(result) { alert('Returned: ' + result); } );
+		 * @example jQuery.aop.introduction( {target: window, method: 'MyGlobalMethod'}, function(result) {
+		 *                alert('Returned: ' + result);
+		 *          } );
 		 * @result Array<Function>
 		 *
-		 * @example jQuery.aop.introduction( {target: String, method: 'log'}, function() { alert('Console: ' + this); } );
+		 * @example jQuery.aop.introduction( {target: String, method: 'log'}, function() {
+		 *                alert('Console: ' + this);
+		 *          } );
 		 * @result Array<Function>
 		 *
 		 * @name introduction
