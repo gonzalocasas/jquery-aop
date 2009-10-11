@@ -133,8 +133,10 @@
 				}
 				catch (e) { }
 
-				if (item != null && isFunc(item) && method.match(pointcut.method))
+				if (item != null && method.match(pointcut.method) && isFunc(item))
+				{
 					advices[advices.length] = weaveOne(source, method, advice);
+				}
 
 			}
 
