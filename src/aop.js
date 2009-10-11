@@ -22,7 +22,7 @@
 	var _arguments = 'arguments';
 	var _undef = 'undefined';
 
-	var typeCheck = (function() {
+	var getType = (function() {
 	 
 		var toString = Object.prototype.toString,
 			toStrings = {},
@@ -49,6 +49,8 @@
 	 
 	})();
 
+	var isFunc = function(obj) { return getType(obj) == 'function'; };
+
 	/**
 	 * Private weaving function.
 	 */
@@ -57,7 +59,7 @@
 		var old = source[method];
 
 		// Work-around IE6/7 behavior on some native method that return object instances
-		if (advice.type != _intro && typeCheck(old) != 'function') {
+		if (advice.type != _intro && !isFunc(old)) {
 			var oldObject = old;
 			old = function() {
 				var code = arguments.length > 0 ? _arguments + '[0]' : '';
@@ -131,7 +133,7 @@
 				}
 				catch (e) { }
 
-				if (item != null && item instanceof Function && method.match(pointcut.method))
+				if (item != null && isFunc(item) && method.match(pointcut.method))
 					advices[advices.length] = weaveOne(source, method, advice);
 
 			}
