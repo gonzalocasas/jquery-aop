@@ -116,7 +116,7 @@
 	var weave = function(pointcut, advice)
 	{
 
-		var source = (typeof(pointcut.target.prototype) != _undef) ? pointcut.target.prototype : pointcut.target;
+		var source = typeof(pointcut.target.prototype) != _undef && typeof(pointcut.target[pointcut.method]) == _undef ? pointcut.target.prototype : pointcut.target;
 		var advices = [];
 
 		// If it's not an introduction and no method was found, try with regex...

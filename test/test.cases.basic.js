@@ -215,4 +215,19 @@ $(document).ready(function(){
 		} ); 
 	})();
 
+
+	(function() {
+		var testFunction = (function(){
+			var func = function(){};
+			func.show = function(){ return 'test'; }
+			return func;
+		})();			
+
+		testAop('issue #9 - Advice on functions as target', {target: testFunction, method: 'show' }, function() { 
+			expect(6);
+
+			return testFunction.show(); 
+		} ); 
+	})();
+
 });
