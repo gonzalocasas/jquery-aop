@@ -109,36 +109,51 @@
 
 	};
 
+	/**
+	 * Private method search
+	 */
+	var search = function(source, pointcut, advice) {
+		
+		var methods = [];
+
+		for (var method in source) {
+
+			var item = null;
+
+			// Ignore exceptions during method retrival
+			try {
+				item = source[method];
+			}
+			catch (e) { }
+
+			if (item != null && method.match(pointcut.method) && isFunc(item))
+				methods[methods.length] = { source: source, method: method, advice: advice };
+
+		}
+
+		return methods;
+	}
 
 	/**
 	 * Private weaver and pointcut parser.
 	 */
-	var weave = function(pointcut, advice)
-	{
+	var weave = function(pointcut, advice) {
 
-		var source = typeof(pointcut.target.prototype) != _undef && typeof(pointcut.target[pointcut.method]) == _undef ? pointcut.target.prototype : pointcut.target;
+		var source = typeof(pointcut.target.prototype) != _undef ? pointcut.target.prototype : pointcut.target;
 		var advices = [];
 
 		// If it's not an introduction and no method was found, try with regex...
-		if (advice.type != _intro && typeof(source[pointcut.method]) == _undef)
-		{
+		if (advice.type != _intro && typeof(source[pointcut.method]) == _undef) {
 
-			for (var method in source)
-			{
-				var item = null;
+			// First try directly on target
+			var methods = search(pointcut.target, pointcut, advice);
 
-				// Ignore exceptions during method retrival
-				try {
-					item = source[method];
-				}
-				catch (e) { }
+			// No method found, re-try directly on prototype
+			if (methods.length == 0)
+				methods = search(source, pointcut, advice);
 
-				if (item != null && method.match(pointcut.method) && isFunc(item))
-				{
-					advices[advices.length] = weaveOne(source, method, advice);
-				}
-
-			}
+			for (var i in methods)
+				advices[advices.length] = weaveOne(methods[i].source, methods[i].method, methods[i].advice);
 
 		} 
 		else

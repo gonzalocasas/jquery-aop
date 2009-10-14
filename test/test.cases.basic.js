@@ -230,4 +230,19 @@ $(document).ready(function(){
 		} ); 
 	})();
 
+	(function() {
+		var testFunction = (function(){
+			var func = function(){};
+			func.show = function(){ return 'test'; }
+			func.show2 = function(){ return 'test'; }
+			return func;
+		})();			
+
+		testAop('issue #9 - Advice on functions as target using regex', {target: testFunction, method: /show/ }, function() { 
+			expect(9);
+
+			return testFunction.show() + testFunction.show2(); 
+		} ); 
+	})();
+
 });
