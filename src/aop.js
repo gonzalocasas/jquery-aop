@@ -14,10 +14,12 @@
 
 (function() {
 
-	var _after	= 1;
-	var _before	= 2;
-	var _around	= 3;
-	var _intro  = 4;
+	var _after			= 1;
+	var _afterThrow		= 2;
+	var _afterFinally	= 3;
+	var _before			= 4;
+	var _around			= 5;
+	var _intro			= 6;
 	var _regexEnabled = true;
 	var _arguments = 'arguments';
 	var _undef = 'undefined';
@@ -73,10 +75,27 @@
 		}
 
 		var aspect;
-		if (advice.type == _after)
+		if (advice.type == _after || advice.type == _afterThrow || advice.type == _afterFinally)
 			aspect = function() {
-				var returnValue = old.apply(this, arguments);
-				return advice.value.apply(this, [returnValue, method]);
+				var returnValue, exceptionThrown = null;
+
+				try {
+					returnValue = old.apply(this, arguments);
+				} catch (e) {
+					exceptionThrown = e;
+				}
+
+				if (advice.type == _after)
+					if (exceptionThrown == null)
+						returnValue = advice.value.apply(this, [returnValue, method]);
+					else
+						throw exceptionThrown;
+				else if (advice.type == _afterThrow && exceptionThrown != null)
+					returnValue = advice.value.apply(this, [exceptionThrown, method]);
+				else if (advice.type == _afterFinally)
+					returnValue = advice.value.apply(this, [returnValue, exceptionThrown, method]);
+
+				return returnValue;
 			};
 		else if (advice.type == _before)
 			aspect = function() {
@@ -199,6 +218,70 @@
 		{
 			return weave( pointcut, { type: _after, value: advice } );
 		},
+
+		/**
+		 * Creates an advice after the defined point-cut only for unhandled exceptions. The advice will be executed 
+		 * after the point-cut method only if the execution failed and an exception has been thrown. It will receive one 
+		 * parameter with the exception thrown by the point-cut method.
+		 * This function returns an array of weaved aspects (Function).
+		 *
+		 * @example jQuery.aop.afterThrow( {target: String, method: 'indexOf'}, function(exception) { 
+		 *                alert('Unhandled exception: ' + exception); 
+		 *                return -1;
+		 *          } );
+		 * @result Array<Function>
+		 *
+		 * @example jQuery.aop.afterThrow( {target: calculator, method: 'Calculate'}, function(exception) { 
+		 *                console.log('Unhandled exception: ' + exception);
+		 *                throw exception;
+		 *          } );
+		 * @result Array<Function>
+		 *
+		 * @name afterThrow
+		 * @param Map pointcut Definition of the point-cut to apply the advice. A point-cut is the definition of the object/s and method/s to be weaved.
+		 * @option Object target Target object to be weaved. 
+		 * @option String method Name of the function to be weaved. Regex are supported, but not on built-in objects.
+		 * @param Function advice Function containing the code that will get called after the execution of the point-cut. It receives one parameter
+		 *                        with the exception thrown by the point-cut method.
+		 *
+		 * @type Array<Function>
+		 * @cat Plugins/General
+		 */
+		afterThrow : function(pointcut, advice)
+		{
+			return weave( pointcut, { type: _afterThrow, value: advice } );
+		},
+
+		/**
+		 * Creates an advice after the defined point-cut. The advice will be executed after the point-cut method 
+		 * regardless of its success or failure, and it will receive two parameters: one with the 
+		 * result of a successful execution or null, and another one with the exception thrown or null.
+		 * This function returns an array of weaved aspects (Function).
+		 *
+		 * @example jQuery.aop.afterFinally( {target: window, method: 'MyGlobalMethod'}, function(result, exception) {
+		 *                if (exception == null)
+		 *                    return 'Returned: ' + result;
+		 *                else
+		 *                    return 'Unhandled exception: ' + exception;
+		 *          } );
+		 * @result Array<Function>
+		 *
+		 * @name afterFinally
+		 * @param Map pointcut Definition of the point-cut to apply the advice. A point-cut is the definition of the object/s and method/s to be weaved.
+		 * @option Object target Target object to be weaved. 
+		 * @option String method Name of the function to be weaved. Regex are supported, but not on built-in objects.
+		 * @param Function advice Function containing the code that will get called after the execution of the point-cut regardless of its success or failure.
+		 *                        It receives two parameters, the first one with the result of a successful execution or null, and the second one with the 
+		 *                        exception or null.
+		 *
+		 * @type Array<Function>
+		 * @cat Plugins/General
+		 */
+		afterFinally : function(pointcut, advice)
+		{
+			return weave( pointcut, { type: _afterFinally, value: advice } );
+		},
+
 
 		/**
 		 * Creates an advice before the defined point-cut. The advice will be executed before the point-cut method 

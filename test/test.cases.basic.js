@@ -245,4 +245,71 @@ $(document).ready(function(){
 		} ); 
 	})();
 
+	test("Testing after advice only on successful execution", function() {
+		expect(1);
+
+		function Thing() {}
+		
+		Thing.prototype.failingMethod = function() { 
+			throw 'Some error';
+		}
+		
+		var aspects = jQuery.aop.after( {target: Thing, method: 'failingMethod' }, 
+			function(result) {
+				ok(true, 'After advice invoked');
+				return result;
+			} 
+		); 
+
+		var thing = new Thing();
+		try {
+			thing.failingMethod();
+		} catch (e) {}
+
+
+		if (aspects.length > 0)
+			for (var i in aspects)
+				aspects[i].unweave();
+		else
+			aspects.unweave();
+
+		ok(true, 'Execution successful');
+
+	});
+
+	test("Testing after advice does not catch exceptions", function() {
+		expect(1);
+
+		function Thing() {}
+		
+		Thing.prototype.failingMethod = function() { 
+			throw 'Some error';
+		}
+		
+		var aspects = jQuery.aop.after( {target: Thing, method: 'failingMethod' }, 
+			function(result) {
+				ok(false, 'This should never execute');
+				return result;
+			} 
+		); 
+
+		var thing = new Thing();
+		var exceptionThrown = null
+		try {
+			thing.failingMethod();
+		} catch (e) {
+			exceptionThrown = e;
+		}
+
+
+		if (aspects.length > 0)
+			for (var i in aspects)
+				aspects[i].unweave();
+		else
+			aspects.unweave();
+
+		same(exceptionThrown, 'Some error', 'Original exception thrown and advice not executed');
+
+	});
+
 });
