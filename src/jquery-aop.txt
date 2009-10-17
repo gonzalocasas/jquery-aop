@@ -1,4 +1,4 @@
-jQuery AOP plugin v1.2
+jQuery AOP plugin v1.3
 http://jquery-aop.googlecode.com/
 
 Licensed under the MIT license:

@@ -5,7 +5,7 @@
 * Licensed under the MIT license:
 * http://www.opensource.org/licenses/mit-license.php
 *
-* Version: 1.2
+* Version: 1.3
 *
 * Cross-frame type detection based on Daniel Steigerwald's code (http://daniel.steigerwald.cz)
 * http://gist.github.com/204554
@@ -151,7 +151,7 @@
 		}
 
 		return methods;
-	}
+	};
 
 	/**
 	 * Private weaver and pointcut parser.
