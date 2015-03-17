@@ -1,6 +1,6 @@
 /**
 * jQuery AOP - jQuery plugin to add features of aspect-oriented programming (AOP) to jQuery.
-* http://jquery-aop.googlecode.com/
+* https://github.com/gonzalocasas/jquery-aop
 *
 * Licensed under the MIT license:
 * http://www.opensource.org/licenses/mit-license.php
