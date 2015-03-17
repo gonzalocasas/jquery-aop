@@ -1,0 +1,26 @@
+{
+  "name": "jquery-aop",
+  "version": "1.3.0",
+  "description": "Add features of aspect-oriented programming (AOP) to jQuery.",
+  "main": "src/aop.js",
+  "bin": {
+    "jquery-aop": "aop.min.js"
+  },
+  "directories": {
+    "doc": "doc",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "open test/aop.test.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gonzalocasas/jquery-aop.git"
+  },
+  "author": "Gonzalo Casas <gonzalocasas@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gonzalocasas/jquery-aop/issues"
+  },
+  "homepage": "https://github.com/gonzalocasas/jquery-aop"
+}
