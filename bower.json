@@ -1,0 +1,20 @@
+{
+  "name": "jquery-aop",
+  "version": "1.3.0",
+  "homepage": "https://github.com/gonzalocasas/jquery-aop",
+  "authors": [
+    "Gonzalo Casas <gonzalocasas@gmail.com>"
+  ],
+  "main": "bin/aop.min.js",
+  "moduleType": [
+    "amd"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
